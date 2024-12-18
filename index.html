@@ -109,7 +109,7 @@
             <p id="coeff-discharge">Coefficient of Discharge: N/A</p>
         </div>
 
-        <canvas id="simulationCanvas" width="800" height="300"></canvas>
+        <canvas id="simulationCanvas" width="800" height="400"></canvas>
     </div>
 
     <script>
@@ -143,52 +143,45 @@
             document.getElementById("coeff-discharge").innerText = `Coefficient of Discharge: ${coeffDischarge.toFixed(5)}`;
 
             // Start simulation
-            startSimulation();
+            startSimulation(head, vNotchTheoretical, rectNotchTheoretical);
         }
 
-        function startSimulation() {
+        function startSimulation(head, vNotchDischarge, rectNotchDischarge) {
             const canvas = document.getElementById("simulationCanvas");
             const ctx = canvas.getContext("2d");
 
-            let waterY = 100;
+            let waterLevel = canvas.height - head * 500; // Scale height dynamically based on head
+            let flowRateV = vNotchDischarge * 1000; // Scale flow rate for simulation
+            let flowRateR = rectNotchDischarge * 1000;
 
             function drawSimulation() {
-                // Clear canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 // Draw V-Notch
                 ctx.beginPath();
-                ctx.moveTo(200, 100);
-                ctx.lineTo(250, 200);
-                ctx.lineTo(150, 200);
+                ctx.moveTo(200, canvas.height);
+                ctx.lineTo(250, waterLevel);
+                ctx.lineTo(150, waterLevel);
                 ctx.closePath();
                 ctx.fillStyle = "gray";
                 ctx.fill();
 
                 // Draw Rectangular Notch
                 ctx.fillStyle = "gray";
-                ctx.fillRect(500, 100, 100, 100);
+                ctx.fillRect(500, waterLevel - 50, 100, 50);
 
-                // Draw water flow
+                // Draw water flowing out
                 ctx.fillStyle = "blue";
-                ctx.fillRect(150, waterY, 100, 10); // Water over V-Notch
-                ctx.fillRect(500, waterY + 10, 100, 10); // Water over Rectangular Notch
+                ctx.fillRect(150, canvas.height - flowRateV, 100, 10);
+                ctx.fillRect(500, canvas.height - flowRateR, 100, 10);
 
+                // Draw labels
                 ctx.fillStyle = "black";
-                ctx.fillText("V-Notch", 200, 220);
-                ctx.fillText("Rectangular Notch", 520, 220);
-            }
-
-            function animateWater() {
-                if (waterY < 200) {
-                    waterY += 1; // Simulate flow
-                    drawSimulation();
-                    requestAnimationFrame(animateWater);
-                }
+                ctx.fillText("V-Notch", 200, canvas.height - 10);
+                ctx.fillText("Rectangular Notch", 520, canvas.height - 10);
             }
 
             drawSimulation();
-            animateWater();
         }
     </script>
 </body>
