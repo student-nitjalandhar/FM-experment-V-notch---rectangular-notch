@@ -157,6 +157,14 @@
             function drawSimulation() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+                // Draw background (unfilled portion)
+                ctx.fillStyle = "#f0f0f0";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw water (filled portion)
+                ctx.fillStyle = "rgba(0, 120, 255, 0.5)";
+                ctx.fillRect(0, waterLevel, canvas.width, canvas.height - waterLevel);
+
                 // Draw V-Notch
                 ctx.beginPath();
                 ctx.moveTo(200, canvas.height);
