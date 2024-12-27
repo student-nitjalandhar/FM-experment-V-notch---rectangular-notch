@@ -3,49 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flow Over a Notch Experiment</title>
+    <title>Notch Experiment</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
             margin: 0;
             padding: 0;
-            background-color: #f4f8fb;
         }
-
         header {
             background-color: #004080;
             color: white;
-            text-align: center;
             padding: 1rem;
+            text-align: center;
         }
-
-        header h1 {
-            margin: 0;
-        }
-
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 2rem auto;
-            background: white;
-            padding: 2rem;
+            padding: 1rem;
+            background-color: white;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
         label {
+            display: block;
+            margin: 1rem 0 0.5rem;
             font-weight: bold;
         }
-
         input {
-            width: calc(100% - 20px);
+            width: calc(100% - 2rem);
             padding: 0.5rem;
             margin-bottom: 1rem;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-
-        .btn {
-            display: inline-block;
+        button {
             padding: 0.7rem 1.5rem;
             background-color: #004080;
             color: white;
@@ -53,30 +45,30 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
-        .btn:hover {
+        button:hover {
             background-color: #003060;
         }
-
         .results {
-            margin-top: 2rem;
+            margin-top: 1rem;
             padding: 1rem;
-            background: #e6f7ff;
+            background-color: #e6ffe6;
+            border: 1px solid #b3ffb3;
             border-radius: 8px;
         }
-
-        canvas {
-            border: 1px solid #ccc;
-            margin-top: 2rem;
-        }
-
         .simulation {
+            margin-top: 2rem;
             text-align: center;
         }
-
-        #simulationCanvas {
+        canvas {
             border: 1px solid #ccc;
-            background: #eef7ff;
+            background-color: #f0f8ff;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #004080;
+            color: white;
+            margin-top: 2rem;
         }
     </style>
 </head>
@@ -86,110 +78,108 @@
     </header>
 
     <div class="container">
-        <div>
-            <label for="theta">Angle for V-Notch (θ in degrees):</label>
-            <input type="number" id="theta" placeholder="e.g., 60">
+        <h2>Inputs</h2>
+        <label for="theta">Angle of V-Notch (θ in degrees):</label>
+        <input type="number" id="theta" placeholder="e.g., 90">
 
-            <label for="breadth">Breadth for Rectangular Notch (B in m):</label>
-            <input type="number" id="breadth" placeholder="e.g., 0.3">
+        <label for="H_v">Head for V-Notch (H in m):</label>
+        <input type="number" id="H_v" placeholder="e.g., 0.1">
 
-            <label for="head">Head Over the Notch (H in m):</label>
-            <input type="number" id="head" placeholder="e.g., 0.1">
+        <label for="B">Width of Rectangular Notch (B in m):</label>
+        <input type="number" id="B" placeholder="e.g., 0.2">
 
-            <label for="actual-discharge">Actual Discharge (m³/s):</label>
-            <input type="number" id="actual-discharge" placeholder="e.g., 0.002">
+        <label for="H_r">Head for Rectangular Notch (H in m):</label>
+        <input type="number" id="H_r" placeholder="e.g., 0.1">
 
-            <button class="btn" onclick="calculateDischarge()">Calculate & Simulate</button>
-        </div>
+        <label for="Q_actual_v">Actual Discharge for V-Notch (m³/s):</label>
+        <input type="number" id="Q_actual_v" placeholder="e.g., 0.003">
+
+        <label for="Q_actual_r">Actual Discharge for Rectangular Notch (m³/s):</label>
+        <input type="number" id="Q_actual_r" placeholder="e.g., 0.005">
+
+        <button onclick="calculateDischarge()">Calculate</button>
 
         <div class="results" id="results">
             <h2>Results</h2>
             <p id="v-notch-discharge">V-Notch Theoretical Discharge: N/A</p>
             <p id="rect-notch-discharge">Rectangular Notch Theoretical Discharge: N/A</p>
-            <p id="coeff-discharge">Coefficient of Discharge: N/A</p>
+            <p id="v-notch-coefficient">V-Notch Coefficient of Discharge: N/A</p>
+            <p id="rect-notch-coefficient">Rectangular Notch Coefficient of Discharge: N/A</p>
         </div>
 
-        <canvas id="simulationCanvas" width="800" height="400"></canvas>
+        <div class="simulation">
+            <h2>Simulation</h2>
+            <canvas id="notchCanvas" width="800" height="400"></canvas>
+        </div>
     </div>
+
+    <footer>
+        <p>&copy; 2024 Fluid Mechanics Lab</p>
+    </footer>
 
     <script>
         function calculateDischarge() {
-            const g = 9.81; // Acceleration due to gravity in m/s²
-            const theta = parseFloat(document.getElementById("theta").value);
-            const breadth = parseFloat(document.getElementById("breadth").value);
-            const head = parseFloat(document.getElementById("head").value);
-            const actualDischarge = parseFloat(document.getElementById("actual-discharge").value);
+            const g = 9.81; // Acceleration due to gravity (m/s²)
+            const theta = parseFloat(document.getElementById('theta').value);
+            const H_v = parseFloat(document.getElementById('H_v').value);
+            const B = parseFloat(document.getElementById('B').value);
+            const H_r = parseFloat(document.getElementById('H_r').value);
+            const Q_actual_v = parseFloat(document.getElementById('Q_actual_v').value);
+            const Q_actual_r = parseFloat(document.getElementById('Q_actual_r').value);
 
-            if (isNaN(theta) || isNaN(breadth) || isNaN(head) || isNaN(actualDischarge)) {
-                alert("Please enter valid inputs.");
+            if (isNaN(theta) || isNaN(H_v) || isNaN(B) || isNaN(H_r) || isNaN(Q_actual_v) || isNaN(Q_actual_r)) {
+                alert("Please enter valid inputs for all fields.");
                 return;
             }
 
-            // Convert theta to radians
-            const thetaRad = (theta * Math.PI) / 180;
+            // V-Notch Theoretical Discharge
+            const thetaRad = (theta * Math.PI) / 180; // Convert degrees to radians
+            const vNotchDischarge = (8 / 15) * Math.sqrt(2 * g) * Math.tan(thetaRad / 2) * Math.pow(H_v, 2.5);
 
-            // Calculate theoretical discharge for V-Notch
-            const vNotchTheoretical = (8 / 15) * Math.sqrt(2 * g) * Math.tan(thetaRad / 2) * Math.pow(head, 2.5);
+            // Rectangular Notch Theoretical Discharge
+            const rectNotchDischarge = (2 / 3) * Math.sqrt(2 * g) * B * Math.pow(H_r, 1.5);
 
-            // Calculate theoretical discharge for Rectangular Notch
-            const rectNotchTheoretical = (2 / 3) * Math.sqrt(2 * g) * breadth * Math.pow(head, 1.5);
+            // Coefficients of Discharge
+            const Cd_v = Q_actual_v / vNotchDischarge;
+            const Cd_r = Q_actual_r / rectNotchDischarge;
 
-            // Calculate coefficient of discharge
-            const coeffDischarge = actualDischarge / (vNotchTheoretical + rectNotchTheoretical);
+            // Display Results
+            document.getElementById('v-notch-discharge').innerText = `V-Notch Theoretical Discharge: ${vNotchDischarge.toFixed(3)} m³/s`;
+            document.getElementById('rect-notch-discharge').innerText = `Rectangular Notch Theoretical Discharge: ${rectNotchDischarge.toFixed(3)} m³/s`;
+            document.getElementById('v-notch-coefficient').innerText = `V-Notch Coefficient of Discharge: ${Cd_v.toFixed(3)}`;
+            document.getElementById('rect-notch-coefficient').innerText = `Rectangular Notch Coefficient of Discharge: ${Cd_r.toFixed(3)}`;
 
-            // Update results in the DOM
-            document.getElementById("v-notch-discharge").innerText = `V-Notch Theoretical Discharge: ${vNotchTheoretical.toFixed(5)} m³/s`;
-            document.getElementById("rect-notch-discharge").innerText = `Rectangular Notch Theoretical Discharge: ${rectNotchTheoretical.toFixed(5)} m³/s`;
-            document.getElementById("coeff-discharge").innerText = `Coefficient of Discharge: ${coeffDischarge.toFixed(5)}`;
-
-            // Start simulation
-            startSimulation(head, vNotchTheoretical, rectNotchTheoretical);
+            // Simulate
+            drawSimulation(H_v, H_r);
         }
 
-        function startSimulation(head, vNotchDischarge, rectNotchDischarge) {
-            const canvas = document.getElementById("simulationCanvas");
-            const ctx = canvas.getContext("2d");
+        function drawSimulation(H_v, H_r) {
+            const canvas = document.getElementById('notchCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            let waterLevel = canvas.height - head * 500; // Scale height dynamically based on head
-            let flowRateV = vNotchDischarge * 1000; // Scale flow rate for simulation
-            let flowRateR = rectNotchDischarge * 1000;
+            // Draw Tank
+            ctx.fillStyle = "#ccc";
+            ctx.fillRect(100, 50, 600, 300);
 
-            function drawSimulation() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw Water for V-Notch
+            ctx.fillStyle = "#007BFF";
+            ctx.beginPath();
+            ctx.moveTo(100, 350);
+            ctx.lineTo(400, 350 - H_v * 3000);
+            ctx.lineTo(400, 350);
+            ctx.closePath();
+            ctx.fill();
 
-                // Draw background (unfilled portion)
-                ctx.fillStyle = "#f0f0f0";
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Draw Water for Rectangular Notch
+            ctx.fillStyle = "#00BFFF";
+            ctx.fillRect(400, 350 - H_r * 3000, 300, H_r * 3000);
 
-                // Draw water (filled portion)
-                ctx.fillStyle = "rgba(0, 120, 255, 0.5)";
-                ctx.fillRect(0, waterLevel, canvas.width, canvas.height - waterLevel);
-
-                // Draw V-Notch
-                ctx.beginPath();
-                ctx.moveTo(200, canvas.height);
-                ctx.lineTo(250, waterLevel);
-                ctx.lineTo(150, waterLevel);
-                ctx.closePath();
-                ctx.fillStyle = "gray";
-                ctx.fill();
-
-                // Draw Rectangular Notch
-                ctx.fillStyle = "gray";
-                ctx.fillRect(500, waterLevel - 50, 100, 50);
-
-                // Draw water flowing out
-                ctx.fillStyle = "blue";
-                ctx.fillRect(150, canvas.height - flowRateV, 100, 10);
-                ctx.fillRect(500, canvas.height - flowRateR, 100, 10);
-
-                // Draw labels
-                ctx.fillStyle = "black";
-                ctx.fillText("V-Notch", 200, canvas.height - 10);
-                ctx.fillText("Rectangular Notch", 520, canvas.height - 10);
-            }
-
-            drawSimulation();
+            // Labels
+            ctx.fillStyle = "black";
+            ctx.font = "16px Arial";
+            ctx.fillText("V-Notch", 200, 40);
+            ctx.fillText("Rectangular Notch", 500, 40);
         }
     </script>
 </body>
